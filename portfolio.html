@@ -1,0 +1,243 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Srikanth Vemulawada - Software Engineer Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .sidebar {
+      transition: transform 0.3s ease;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <!-- Sidebar Navigation -->
+  <nav class="fixed top-0 left-0 h-full w-64 bg-gray-800 dark:bg-gray-700 text-white sidebar z-20 md:translate-x-0">
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-6">Menu</h2>
+      <button id="close-sidebar" class="md:hidden mb-4 text-teal-400 hover:text-teal-300">Close</button>
+      <ul class="space-y-4">
+        <li><a href="#about" class="block text-teal-400 hover:text-teal-300 transition">About</a></li>
+        <li><a href="#projects" class="block text-teal-400 hover:text-teal-300 transition">Projects</a></li>
+        <li><a href="#skills" class="block text-teal-400 hover:text-teal-300 transition">Skills</a></li>
+        <li><a href="#resume" class="block text-teal-400 hover:text-teal-300 transition">Resume</a></li>
+        <li><a href="#contact" class="block text-teal-400 hover:text-teal-300 transition">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+  <button id="open-sidebar" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-teal-500 text-white rounded-lg">Menu</button>
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-16">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-2">Srikanth Vemulawada</h1>
+      <p class="text-lg md:text-xl">Software Engineer | Full-Stack Developer | Security Enthusiast</p>
+      <button id="theme-toggle" class="mt-4 px-4 py-2 bg-teal-500 dark:bg-coral-500 text-white rounded-lg hover:bg-teal-400 dark:hover:bg-coral-400">
+        Toggle Dark Mode
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8 md:ml-64">
+    <!-- About Section -->
+    <section id="about" class="section mb-12 fade-in">
+      <h2 class="text-3xl font-semibold border-b-2 border-teal-500 pb-2 mb-6">About Me</h2>
+      <p class="text-lg">
+        I'm Srikanth Vemulawada, a detail-oriented Software Engineer with 2 years of experience at Accenture, specializing in full-stack development. I build RESTful APIs with Java and Spring Boot, create dynamic user interfaces with Angular, and develop secure, scalable applications. My expertise includes CI/CD automation with GitLab, database development with Oracle, and test automation using JUnit and Selenium. With an AWS Certified Solutions Architect – Associate certification and a Master’s in Computer Science from the University of Central Missouri, I’m passionate about leveraging cloud technologies and security practices to deliver innovative solutions.
+      </p>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section mb-12 fade-in">
+      <h2 class="text-3xl font-semibold border-b-2 border-teal-500 pb-2 mb-6">Projects</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-lg">
+          <h3 class="text-xl font-bold mb-2 text-coral-500">E-Commerce Platform API & Frontend</h3>
+          <p><strong>Description:</strong> Developed a full-stack e-commerce platform with a Spring Boot backend and Angular frontend, enabling product browsing, cart management, and secure checkout.</p>
+          <p><strong>Role:</strong> Full-Stack Developer</p>
+          <p><strong>Technologies:</strong> Java, Spring Boot, Spring Security, Angular, Oracle, GitLab CI/CD, Swagger</p>
+          <p><strong>Impact:</strong> Improved user engagement by 25% through responsive UI and reduced API response time by 30% with optimized database queries.</p>
+          <a href="https://github.com/srikanth-vemulawada/ecommerce-demo" class="text-teal-500 hover:underline" target="_blank">View Demo</a>
+        </div>
+        <div class="glass-card p-6 rounded-lg">
+          <h3 class="text-xl font-bold mb-2 text-coral-500">Secure Task Management Desktop App</h3>
+          <p><strong>Description:</strong> Built a JavaFX-based desktop application for task management, integrated with Microsoft Entra MFA for secure user authentication.</p>
+          <p><strong>Role:</strong> Lead Developer</p>
+          <p><strong>Technologies:</strong> JavaFX, Spring Boot, Microsoft Entra MFA, SQL, JUnit</p>
+          <p><strong>Impact:</strong> Enhanced security for 100+ users by implementing MFA and streamlined task assignment processes, saving 10 hours weekly.</p>
+          <a href="https://github.com/srikanth-vemulawada/task-app-demo" class="text-teal-500 hover:underline" target="_blank">View Demo</a>
+        </div>
+        <div class="glass-card p-6 rounded-lg">
+          <h3 class="text-xl font-bold mb-2 text-coral-500">Data Analytics Dashboard</h3>
+          <p><strong>Description:</strong> Created a web-based dashboard using Angular and Power BI to visualize sales data, with automated CI/CD pipelines for deployment.</p>
+          <p><strong>Role:</strong> Frontend Developer & DevOps Engineer</p>
+          <p><strong>Technologies:</strong> Angular, Power BI, GitLab CI/CD, Oracle, Selenium</p>
+          <p><strong>Impact:</strong> Enabled real-time data insights for 50+ stakeholders, reducing reporting time by 40%.</p>
+          <a href="https://github.com/srikanth-vemulawada/dashboard-demo" class="text-teal-500 hover:underline" target="_blank">View Demo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section mb-12 fade-in">
+      <h2 class="text-3xl font-semibold border-b-2 border-teal-500 pb-2 mb-6">Skills</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-4 rounded-lg text-center">Java</div>
+        <div class="glass-card p-4 rounded-lg text-center">Spring Boot</div>
+        <div class="glass-card p-4 rounded-lg text-center">Angular</div>
+        <div class="glass-card p-4 rounded-lg text-center">SQL</div>
+        <div class="glass-card p-4 rounded-lg text-center">GitLab CI/CD</div>
+        <div class="glass-card p-4 rounded-lg text-center">Selenium</div>
+        <div class="glass-card p-4 rounded-lg text-center">Power BI</div>
+        <div class="glass-card p-4 rounded-lg text-center">AWS</div>
+        <div class="glass-card p-4 rounded-lg text-center">Penetration Testing</div>
+      </div>
+    </section>
+
+    <!-- Resume Section -->
+    <section id="resume" class="section mb-12 fade-in">
+      <h2 class="text-3xl font-semibold border-b-2 border-teal-500 pb-2 mb-6">Resume</h2>
+      <p><strong>Download:</strong> <a href="./SRIKANTH_VEMULAWADA_resume.pdf" class="text-teal-500 hover:underline" target="_blank">View Full Resume</a></p>
+      <p><strong>Experience:</strong> Associate Software Engineer, Accenture, Hyderabad, India (Jan 2021 – Dec 2022)</p>
+      <p><strong>Education:</strong> M.S. in Computer Science, University of Central Missouri; B.S. in Computer Science & Statistics, Satavahana University</p>
+      <p><strong>Certifications:</strong> AWS Certified Solutions Architect – Associate, Google IT Support Professional Certificate, Bayesian Statistics</p>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section mb-12 fade-in">
+      <h2 class="text-3xl font-semibold border-b-2 border-teal-500 pb-2 mb-6">Contact</h2>
+      <p><strong>Email:</strong> <a href="mailto:vemulawada.srikanth05@gmail.com" class="text-teal-500 hover:underline">vemulawada.srikanth05@gmail.com</a></p>
+      <p><strong>Phone:</strong> +1 (913) 762-3856</p>
+      <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/srikanth2000" class="text-teal-500 hover:underline" target="_blank">linkedin.com/in/srikanth2000</a></p>
+      <p><strong>Portfolio:</strong> <a href="https://srikanth-vemulawada-portfolio.netlify.app" class="text-teal-500 hover:underline" target="_blank">srikanth-vemulawada-portfolio.netlify.app</a></p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 dark:bg-gray-700 text-white py-4 text-center">
+    <p>© 2025 Srikanth Vemulawada. All rights reserved.</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    'use strict';
+
+    // Theme Toggle
+    const toggleButton = document.getElementById('theme-toggle');
+    const body = document.body;
+    toggleButton.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    if (localStorage.getItem('theme') === 'dark') {
+      body.classList.add('dark');
+    }
+
+    // Smooth Scrolling
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = anchor.getAttribute('href');
+        document.querySelector(targetId).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Sidebar Toggle
+    const openSidebar = document.getElementById('open-sidebar');
+    const closeSidebar = document.getElementById('close-sidebar');
+    const sidebar = document.querySelector('.sidebar');
+    openSidebar.addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+    closeSidebar.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+
+    // Fade-in Animation
+    const sections = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
